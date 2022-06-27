@@ -1,0 +1,16 @@
+---
+- name: Create directory
+  ansible.builtin.file:
+    path: "{{ zero_ui.path }}"
+    state: directory
+
+- name: Template Docker Compose configuration
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ zero_ui.path }}/docker-compose.yml"
+
+- name: Start ZeroUI
+  community.general.docker_compose:
+    project_src: "{{ zero_ui.path }}"
+    state: present
+  become: true

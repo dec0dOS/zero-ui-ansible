@@ -1,0 +1,22 @@
+---
+zero_ui:
+  image: dec0dos/zero-ui
+  version: latest
+  port: 4000
+  config:
+    controller_endpoint: http://zerotier:9993/
+    secure_headers: false
+    default_username: admin
+    default_password: zero-ui
+
+  setup_zerotier: true
+  zerotier:
+    image: zyclonite/zerotier
+    version: latest
+    config:
+      override_local_conf: true
+      allow_management_from: 0.0.0.0/0
+
+  volumes:
+    controller_data: controller_data
+    zero_ui_data: zero_ui_data

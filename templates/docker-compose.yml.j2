@@ -1,0 +1,68 @@
+{% macro env_config(prefix, config) %}
+{% for section_name, section in config.items() %}
+{% if section is not mapping %}
+{% if section is sameas true or section is sameas false %}
+      - {{ prefix }}_{{ section_name | upper }}={{ section | lower }}
+{% else %}
+      - {{ prefix }}_{{ section_name | upper }}={{ section }}
+{% endif %}
+{% else %}
+{% for key, value in section.items() %}
+      - {{ prefix }}_{{ section_name | upper }}_{{ key | upper }}={{ value }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endmacro -%}
+
+version: "3"
+
+services:
+{% if zero_ui.setup_zerotier %}
+  zerotier:
+    image: {{ zero_ui.zerotier.image }}:{{ zero_ui.zerotier.version }}
+    container_name: zu-controller
+    restart: unless-stopped
+    expose:
+      - "9993/tcp"
+    ports:
+      - "9993:9993/udp"
+    volumes:
+      - {{ zero_ui.volumes.controller_data }}:/var/lib/zerotier-one
+{% if zero_ui.zerotier.config.override_local_conf %}
+    environment:
+{{ env_config("ZT", zero_ui.zerotier.config | default({})) -}}
+{% endif %}
+{% endif %}
+  zero-ui:
+    image: {{ zero_ui.image }}:{{ zero_ui.version }}
+    container_name: zu-main
+    restart: unless-stopped
+{% if zero_ui.setup_zerotier %}
+    depends_on: [ zerotier ]
+{% endif %}
+{% if zero_ui.network_mode is defined %}
+    network_mode: {{ zero_ui.network_mode }}
+{% endif %}
+    ports:
+      - "{{ zero_ui.port }}:4000"
+    volumes:
+{% if zero_ui.setup_zerotier %}
+      - {{ zero_ui.volumes.controller_data }}:/var/lib/zerotier-one
+{% endif %}
+      - {{ zero_ui.volumes.zero_ui_data }}:/app/backend/data
+    environment:
+      - NODE_ENV=production
+{% if zero_ui.listen_address is defined %}
+      - LISTEN_ADDRESS={{ zero_ui.listen_address }}
+{% endif %}
+{{ env_config("ZU", zero_ui.config | default({})) -}}
+
+volumes:
+{% if '/' not in zero_ui.volumes.zero_ui_data | string %}
+  {{ zero_ui.volumes.zero_ui_data}}:
+{% endif %}
+{% if '/' not in zero_ui.volumes.controller_data | string %}
+{% if zero_ui.setup_zerotier %}
+  {{ zero_ui.volumes.controller_data }}:
+{% endif %}
+{% endif %}
