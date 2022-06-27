@@ -1,5 +1,5 @@
 ---
-name: GitHub Action
+name: Check and publish
 
 on:
   push:
@@ -16,8 +16,11 @@ jobs:
       - name: Run ansible-lint
         uses: ansible-community/ansible-lint-action@main
 
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@master
+
       - name: Publish to Galaxy
-        uses: robertdebock/galaxy-action@1.2.1
+        uses: robertdebock/galaxy-action@master
         with:
           galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}
           git_branch: main
