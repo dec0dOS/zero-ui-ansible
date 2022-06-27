@@ -1,4 +1,8 @@
 ---
+- name: Set zero_ui variable
+  set_fact:
+    zero_ui: zero_ui_default | combine(zero_ui | default({}), recursive=True)
+
 - name: Create directory
   ansible.builtin.file:
     path: "{{ zero_ui.path }}"

@@ -1,5 +1,5 @@
 ---
-zero_ui:
+zero_ui_default:
   image: dec0dos/zero-ui
   version: latest
   port: 4000
