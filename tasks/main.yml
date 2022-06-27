@@ -1,6 +1,6 @@
 ---
 - name: Set zero_ui variable
-  set_fact:
+  ansible.builtin.set_fact:
     zero_ui: "{{ zero_ui_default | combine(zero_ui | default({}), recursive=True) }}"
 
 - name: Create directory
